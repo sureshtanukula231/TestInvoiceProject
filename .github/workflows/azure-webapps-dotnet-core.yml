@@ -21,7 +21,7 @@ name: Invoice Generate API
 
 env:
   AZURE_WEBAPP_NAME: invoice-serviceapi    # set this to the name of your Azure Web App
-  AZURE_WEBAPP_PACKAGE_PATH: './.net-app'      # set this to the path to your web app project, defaults to the repository root
+  AZURE_WEBAPP_PACKAGE_PATH: './publish_output'      # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '8.x'                 # set this to the .NET Core version to use
 
 on:
@@ -56,13 +56,13 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish -c Release -o publish_output
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: publish_output
 
   deploy:
     permissions:
@@ -78,6 +78,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+          path: publish_output      
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -85,4 +86,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          package: publish_output
